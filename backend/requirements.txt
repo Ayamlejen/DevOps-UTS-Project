@@ -1,3 +1,9 @@
 fastapi
 uvicorn[standard]
 python-multipart
+torch
+librosa
+numpy
+sqlalchemy
+psycopg[binary]
+python-dotenv

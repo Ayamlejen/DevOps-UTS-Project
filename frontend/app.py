@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+import os
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -10,7 +11,7 @@ st.set_page_config(
 )
 
 # URL Backend FastAPI
-API_URL = "http://localhost:8000"
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 # Judul aplikasi
 st.title("🎵 Music Genre Classification")

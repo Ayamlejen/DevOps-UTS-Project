@@ -171,3 +171,38 @@ async def predict_genre(file: UploadFile = File(...)):
 
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
+
+@app.get("/history")
+def get_prediction_history():
+
+    db = SessionLocal()
+
+    try:
+        history = (
+            db.query(PredictionHistory)
+            .order_by(PredictionHistory.created_at.desc())
+            .all()
+        )
+
+        return [
+            {
+                "id": item.id,
+                "filename": item.filename,
+                "predicted_genre": item.predicted_genre,
+                "confidence": item.confidence,
+                "created_at": (
+                    item.created_at.isoformat()
+                    if item.created_at else None
+                )
+            }
+            for item in history
+        ]
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+    finally:
+        db.close()

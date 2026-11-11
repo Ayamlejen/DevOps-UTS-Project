@@ -52,8 +52,6 @@ jobs:
         run: |
           docker compose -p devops-uts-project up -d --build
 
-          if ($LASTEXITCODE -ne 0) {
-              exit $LASTEXITCODE
-          }
+           if errorlevel 1 exit /b 1
 
           docker compose -p devops-uts-project ps

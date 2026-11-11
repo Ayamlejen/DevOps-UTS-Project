@@ -1,11 +1,18 @@
-name: Docker CI
+name: Docker CI CD
 
 on:
   push:
-  pull_request:
+    branches:
+      
+main
+pull_request:
+  branches:
+main
 
 jobs:
+  # CONTINUOUS INTEGRATION
   build:
+    name: Docker CI
     runs-on: ubuntu-latest
 
     env:
@@ -14,14 +21,48 @@ jobs:
       POSTGRES_DB: music_genre_db
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      
+name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      
+name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      - name: Validate Docker Compose
-        run: docker compose config
+      
+name: Validate Docker Compose
+      run: docker compose config
 
-      - name: Build Docker Images
-        run: docker compose build
+      
+name: Build Docker Images
+      run: docker compose build
+
+  # CONTINUOUS DEPLOYMENT
+  deploy:
+    name: Docker CD
+    needs: build
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: [self-hosted, Windows, X64]
+
+    steps:
+      
+name: Checkout Repository
+      uses: actions/checkout@v4
+
+      
+name: Deploy with Docker Compose
+      shell: pwsh
+      env:
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      run: |
+        docker compose -p devops-uts-project up -d --build
+
+          if ($LASTEXITCODE -ne 0) {
+              exit $LASTEXITCODE
+          }
+
+            docker compose -p devops-uts-project ps

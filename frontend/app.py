@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import pandas as pd
 import os
+import html
+
 
 # ==========================================
 # KONFIGURASI HALAMAN
@@ -21,12 +23,17 @@ API_URL = os.getenv("API_URL", "http://localhost:8000")
 # CUSTOM CSS
 # ==========================================
 
-st.markdown("""
+st.html("""
 <style>
 
 /* Background */
 .stApp {
-    background: linear-gradient(135deg, #0f1020 0%, #19152f 55%, #21183b 100%);
+    background: linear-gradient(
+        135deg,
+        #0f1020 0%,
+        #19152f 55%,
+        #21183b 100%
+    );
     color: #f5f3ff;
 }
 
@@ -88,8 +95,10 @@ section[data-testid="stSidebar"] {
     padding: 28px;
     text-align: center;
     margin-top: 15px;
+    min-height: 175px;
 }
 
+/* Genre */
 .genre-result {
     font-size: 38px;
     font-weight: 800;
@@ -97,6 +106,7 @@ section[data-testid="stSidebar"] {
     text-transform: uppercase;
 }
 
+/* Confidence */
 .confidence-result {
     font-size: 30px;
     font-weight: 700;
@@ -158,7 +168,18 @@ hr {
 }
 
 </style>
-""", unsafe_allow_html=True)
+""")
+
+
+# ==========================================
+# SESSION STATE
+# ==========================================
+
+if "prediction_result" not in st.session_state:
+    st.session_state["prediction_result"] = None
+
+if "history_data" not in st.session_state:
+    st.session_state["history_data"] = None
 
 
 # ==========================================
@@ -167,48 +188,64 @@ hr {
 
 with st.sidebar:
 
-    st.markdown("# 🎵 Music Genre AI")
+    st.html("""
+    <div style="padding-top: 10px;">
+        <h1 style="color: white;">🎵 Music Genre AI</h1>
 
-    st.caption("CNN-Based Music Classification")
+        <p style="color: #b8b1d1;">
+            CNN-Based Music Classification
+        </p>
 
-    st.divider()
+        <hr style="border-color: #403458;">
 
-    st.markdown("### 📌 Tentang Aplikasi")
+        <h3 style="color: white;">
+            📌 Tentang Aplikasi
+        </h3>
 
-    st.write(
-        "Aplikasi ini menggunakan "
-        "Convolutional Neural Network (CNN) "
-        "untuk mengidentifikasi genre musik "
-        "berdasarkan file audio."
-    )
+        <p style="color: #d1cbe3; line-height: 1.6;">
+            Aplikasi ini menggunakan
+            Convolutional Neural Network (CNN)
+            untuk mengidentifikasi genre musik
+            berdasarkan file audio.
+        </p>
 
-    st.divider()
+        <hr style="border-color: #403458;">
 
-    st.markdown("### 🎧 Fitur")
+        <h3 style="color: white;">🎧 Fitur</h3>
 
-    st.markdown("""
-    - Upload audio WAV
-    - Prediksi genre musik
-    - Confidence prediction
-    - Riwayat klasifikasi
+        <ul style="color: #d1cbe3; line-height: 2;">
+            <li>Upload audio WAV</li>
+            <li>Prediksi genre musik</li>
+            <li>Confidence prediction</li>
+            <li>Riwayat klasifikasi</li>
+        </ul>
+
+        <hr style="border-color: #403458;">
+
+        <p style="color: #9388b2; font-size: 13px;">
+            Machine Learning Project
+        </p>
+
+        <p style="color: #9388b2; font-size: 13px;">
+            Frontend: Streamlit
+        </p>
+
+        <p style="color: #9388b2; font-size: 13px;">
+            Backend: FastAPI
+        </p>
+
+        <p style="color: #9388b2; font-size: 13px;">
+            Database: PostgreSQL
+        </p>
+    </div>
     """)
-
-    st.divider()
-
-    st.caption("Machine Learning Project")
-
-    st.caption("Frontend: Streamlit")
-
-    st.caption("Backend: FastAPI")
-
-    st.caption("Database: PostgreSQL")
 
 
 # ==========================================
 # HEADER
 # ==========================================
 
-st.markdown("""
+st.html("""
 <div style="
     background: linear-gradient(120deg, #35245c, #241b42);
     border: 1px solid #59427e;
@@ -226,22 +263,25 @@ st.markdown("""
     <div class="hero-subtitle">
         Kenali genre musik secara otomatis menggunakan
         teknologi Deep Learning dan Convolutional Neural Network.
+
         <br>
+
         Upload audio Anda dan biarkan AI menganalisisnya.
     </div>
 
 </div>
-""", unsafe_allow_html=True)
+""")
 
 
 # ==========================================
 # UPLOAD AUDIO
 # ==========================================
 
-st.markdown(
-    '<div class="section-title">🎧 Klasifikasi Audio</div>',
-    unsafe_allow_html=True
-)
+st.html("""
+<div class="section-title">
+    🎧 Klasifikasi Audio
+</div>
+""")
 
 with st.container(border=True):
 
@@ -260,7 +300,9 @@ with st.container(border=True):
 
     if uploaded_file is not None:
 
-        st.success(f"File berhasil dipilih: {uploaded_file.name}")
+        st.success(
+            f"File berhasil dipilih: {uploaded_file.name}"
+        )
 
         st.audio(uploaded_file)
 
@@ -294,6 +336,10 @@ with st.container(border=True):
 
                         st.session_state["prediction_result"] = result
 
+                        st.success(
+                            "Prediksi berhasil dilakukan!"
+                        )
+
                     else:
 
                         st.error(
@@ -322,16 +368,17 @@ with st.container(border=True):
 # HASIL PREDIKSI
 # ==========================================
 
-if "prediction_result" in st.session_state:
+if st.session_state["prediction_result"] is not None:
 
     result = st.session_state["prediction_result"]
 
     st.markdown("---")
 
-    st.markdown(
-        '<div class="section-title">📊 Hasil Analisis Musik</div>',
-        unsafe_allow_html=True
-    )
+    st.html("""
+    <div class="section-title">
+        📊 Hasil Analisis Musik
+    </div>
+    """)
 
     st.success("Prediksi berhasil dilakukan!")
 
@@ -339,7 +386,11 @@ if "prediction_result" in st.session_state:
 
     with col1:
 
-        st.markdown(f"""
+        genre = html.escape(
+            str(result["predicted_genre"])
+        )
+
+        st.html(f"""
         <div class="result-card">
 
             <div style="font-size: 35px;">🎼</div>
@@ -349,15 +400,19 @@ if "prediction_result" in st.session_state:
             </div>
 
             <div class="genre-result">
-                {result["predicted_genre"]}
+                {genre}
             </div>
 
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     with col2:
 
-        st.markdown(f"""
+        confidence = html.escape(
+            str(result["confidence_percentage"])
+        )
+
+        st.html(f"""
         <div class="result-card">
 
             <div style="font-size: 35px;">🎯</div>
@@ -367,14 +422,18 @@ if "prediction_result" in st.session_state:
             </div>
 
             <div class="confidence-result">
-                {result["confidence_percentage"]}%
+                {confidence}%
             </div>
 
         </div>
-        """, unsafe_allow_html=True)
+        """)
+
+    filename = html.escape(
+        str(result["filename"])
+    )
 
     st.markdown(
-        f"**Nama file:** `{result['filename']}`"
+        f"**Nama file:** `{filename}`"
     )
 
 
@@ -384,10 +443,11 @@ if "prediction_result" in st.session_state:
 
 st.markdown("---")
 
-st.markdown(
-    '<div class="section-title">📋 Riwayat Prediksi</div>',
-    unsafe_allow_html=True
-)
+st.html("""
+<div class="section-title">
+    📋 Riwayat Prediksi
+</div>
+""")
 
 st.write(
     "Lihat daftar audio yang telah dianalisis sebelumnya."
@@ -415,18 +475,24 @@ if st.button(
 
         else:
 
-            st.error("Gagal mengambil riwayat prediksi.")
+            st.error(
+                "Gagal mengambil riwayat prediksi."
+            )
 
     except requests.exceptions.ConnectionError:
 
-        st.error("Backend tidak dapat dihubungi.")
+        st.error(
+            "Backend tidak dapat dihubungi."
+        )
 
     except Exception as e:
 
-        st.error(f"Terjadi kesalahan: {e}")
+        st.error(
+            f"Terjadi kesalahan: {e}"
+        )
 
 
-if "history_data" in st.session_state:
+if st.session_state["history_data"] is not None:
 
     history = st.session_state["history_data"]
 
@@ -446,23 +512,25 @@ if "history_data" in st.session_state:
 
     else:
 
-        st.info("Belum ada riwayat prediksi.")
+        st.info(
+            "Belum ada riwayat prediksi."
+        )
 
 
 # ==========================================
 # FOOTER
 # ==========================================
 
-st.markdown("""
+st.html("""
 <div class="footer">
 
     <hr>
 
     🎵 Music Genre Classification System
 
-    <br>
+    <br><br>
 
     Powered by Streamlit, FastAPI, PostgreSQL & CNN
 
 </div>
-""", unsafe_allow_html=True)
+""")
